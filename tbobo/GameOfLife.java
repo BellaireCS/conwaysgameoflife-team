@@ -10,7 +10,7 @@ public class GameOfLife {
 	private static final int size;
 	
 	static {
-		size = 10;
+		size = 30;
 	}
 	
 	{
@@ -19,7 +19,9 @@ public class GameOfLife {
 		population = 0;
 	}
 	
-	// If no parameters, generate random game
+	/* 
+	 * Generates random game if no constructor params
+	 */
 	public GameOfLife() {
 
 		Random randomBool = new Random();
@@ -32,7 +34,9 @@ public class GameOfLife {
 		}
 	}
 	
-	// Accepts coordinates for desired alive cells in row x col format
+	/* 
+	 * Coordinates come in row by column in a int matrix of 1x2 matrices 
+	 */
 	public GameOfLife(int[][] coordinates) {
 		for (int i = 0; i < coordinates.length; i++) {
 			gameGrid[coordinates[i][0]][coordinates[i][1]] = true;
@@ -48,6 +52,7 @@ public class GameOfLife {
 	public boolean isAlive(int row, int col) {
 		return gameGrid[row][col];
 	}
+	
 	public int getNeighborCount(int row, int col) {
 		int count = 0;
 		int west = col - 1 >= 0 ? col - 1 : size - 1;
@@ -68,6 +73,50 @@ public class GameOfLife {
 		return count;
 	}
 	
+	public void nextTurn() {
+		boolean[][] newBoard = new boolean[size][size];
+		int newPop = 0;
+		
+		for (int i = 0; i < gameGrid.length; i++) {
+			for (int j = 0; j < gameGrid[i].length; j++) {
+				int neighborCount = getNeighborCount(i, j);
+				
+				if (gameGrid[i][j]) {
+					if (neighborCount < 2) {
+						newBoard[i][j] = false;
+					}
+					
+					else if (neighborCount > 3) {
+						newBoard[i][j] = false;
+					}
+					
+					else {
+						newBoard[i][j] = true;
+						newPop++;
+					}
+				}
+				
+				else {
+					if (neighborCount == 3) {
+						newBoard[i][j] = true;
+						newPop++;
+					}
+					
+					else {
+						newBoard[i][j] = false;
+					}
+				}
+			}
+		}
+		
+		gameGrid = newBoard;
+		time++;
+		population = newPop;
+	}
+	
+	/*
+	 * Console "GUI"
+	 */
 	public void display() {	
 		
 		for (int i = 0; i < gameGrid.length; i++) {
@@ -84,9 +133,28 @@ public class GameOfLife {
 		System.out.println("population: " + population);
 	}
 	
+	/*
+	 * Infinite loop to run the game
+	 */
+	public void go() {
+		while (true) {
+			display();
+			nextTurn();
+			
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public static void main(String[] args) {
-		GameOfLife test = new GameOfLife(new int[][]{{0,0}, {1,2}, {9, 0}});
-		test.display();
-		System.out.println(test.getNeighborCount(9, 9));
+		
+		int[][] coordinates = {{5, 2}, {7, 2}, {4, 3}, {4, 4}, {4,5}, {4,6}, {5,6}
+								,{6,6}, {7, 5}
+		};
+		GameOfLife test = new GameOfLife(coordinates);
+		test.go();
 	}
 }
